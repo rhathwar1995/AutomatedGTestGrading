@@ -95,15 +95,15 @@ function evaluate() {
 
     # TODO:
     # Need to use variables for this
-    cp complex/complex.* .
-    cp fractions/fraction.* .
+    cp solutions/solutions.* .
+    cp rpn/rpn.* .
 
     # create a new docker container winpty -Xallow-non-tty
     echo "Creating docker container..."
 
     # To execute this script on a git bash terminal running on a windows 10 machine, use /$PWD:
     # On a linux machine, use $PWD:
-    CONTAINERID="$(docker run -v /$PWD:/source -di klavins/ecep520:cppenv)"
+    CONTAINERID="$(docker run -v /$PWD:/source -di klavins/520w20:cpp)"
     echo "Docker container created with id $CONTAINERID"
 
     # does it compile?

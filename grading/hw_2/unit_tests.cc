@@ -7,23 +7,23 @@
 #include <stdlib.h>
 #include "gtest/gtest.h"
 #include "solutions.h"
-#include "complex.h"
+#include "rpn.h"
 #include "limits.h"
 #include <vector>
-
 
 
 using std::string;
 using std::vector;
 
 #define EPSILON DBL_EPSILON*10.0 // double tolerance
-#define DBL_PRECISION 0.0001
+#define DBL_PRECISION 0.00001
 #define Q1POINTS 100.0
 #define Q2POINTS 100.0
 #define Q3POINTS 100.0
 #define Q4POINTS 100.0
 #define Q5POINTS 100.0
-#define NUM_QUESTIONS 5 // overestimated number of questions
+#define Q6POINTS 100.0
+#define NUM_QUESTIONS 6 // overestimated number of questions
 #define GTEST_COUT_GRADE std::cerr       << "[    GRADE ] "
 
 /*
@@ -310,6 +310,15 @@ protected:
     }
 };
 
+class Question6 : public Question {
+protected:
+    Question6() {
+        id = 5;
+        totals[id] = Q5POINTS;
+        num_tests[id]++;
+    }
+};
+
 /*
  * Question 1: running_total *************************************************
  */
@@ -319,13 +328,17 @@ class RunningTotalTests : public Question1,
 };
 
 std::vector <std::pair <int, int>> tvForRunningTot =
-    { std::make_pair(1, 1)
+    { std::make_pair(0, 0)
+    , std::make_pair(0, 0)
+    , std::make_pair(1, 1)
     , std::make_pair(0, 1)
     , std::make_pair(-1, 0)
+    , std::make_pair(0, 0)
     , std::make_pair(-65, -65)
     , std::make_pair(0, -65)
     , std::make_pair(64, -1)
     , std::make_pair(2, 1)
+    , std::make_pair(-101, -100)
     };
 /*
  * Parameterized test for testing if the running_total method
@@ -363,6 +376,8 @@ std::vector <std::pair <std::vector<int>, std::vector<int>>> tvForRevInPlace =
     , { {0}, {0} }
     , { {-231, 902}, {902, -231} }
     , { {INT_MAX, INT_MIN, 0, INT_MIN, INT_MAX}, {INT_MAX, INT_MIN, 0, INT_MIN, INT_MAX} }
+    , { {56, -260, 062}, {062, -260, 56} }
+    , { {0, 9, 9, 8, 7, 6}, {6, 7, 8, 9, 9, 0} }
     };
 
 
@@ -430,40 +445,6 @@ class NumInstancesTests : public Question4,
                     public testing::WithParamInterface<std::pair <std::vector<int>, int>> {
 };
 
-//Param A name the test class, Param B good name for what the tests represent
-/*TEST_P(NumInstancesTests, NumInstances) {
-    int len = GetParam();
-    int testArray[len];
-    for(int i = 0; i < len; ++i) {
-        testArray[i] = random_int(-10, 10);
-        printf("Array here %d", testArray[i]);
-    }
-
-    int instances[21] = {0};
-    for (int j = 0; j < 21; ++j) {
-        for (int i = 0; i < len; ++i) {
-            if (j-10 == testArray[i]) {
-                instances[j]++;
-            }
-        }
-    }
-
-    int result[21] = {0};
-    for(int i = 0; i < 21; ++i) {
-
-        // Call the student's api
-        result[i] = num_instances(testArray, len, i-10);
-        printf(" check me %d %d ", i-10, result[i]);
-        ASSERT_EQ(result[i], instances[i]);
-    }
-};
-
-//Param A random name, Param B test class and Param C list of inputs.
-INSTANTIATE_TEST_CASE_P(NumInstancesTests,
-        NumInstancesTests,
-        testing::Range(0, 200, 10)
-);*/
-
 std::vector <std::pair <std::vector<int>, int>> tvForNumInst =
     { { {11, 22, 33, 44}, 3 }
     , { {3, 3, 3, 3}, 3 }
@@ -498,4 +479,119 @@ TEST_P(NumInstancesTests, NumInstances) {
 INSTANTIATE_TEST_CASE_P(NumInstancesTests,
         NumInstancesTests,
         testing::ValuesIn(tvForNumInst)
+);
+
+/*
+ * Question 5 *************************************************
+ */
+
+class MapTests : public Question5,
+                    public testing::WithParamInterface<std::vector<Point>> {
+};
+
+Point negate(Point p) {
+    return { -p.x, -p.y, -p.z };
+}
+
+std::vector <std::vector<Point>> tvForMap =
+    { { { 0, -0, 0}, { 3, -3, 3}, { -2, -1, -3} }
+    , { { 0, -9, 0}, { 1, 7, 87}, { -2, 78, -3}, { 57, 879, -3}, { 0, -0, -3} }
+    , { { 150, 9, -0}, { 5, 7, -3}, { 7, 79, -9}, { +0, -0, -3} }
+    };
+
+//Param A name the test class, Param B good name for what the tests represent
+TEST_P(MapTests, Map) {
+    std::vector<Point> testVec = GetParam();
+    int len = testVec.size();
+    Point arr[len], safe_arr[len];
+    std::copy(testVec.begin(), testVec.end(), arr);
+    std::copy(testVec.begin(), testVec.end(), safe_arr);
+
+    Point * b = map(arr, len, negate);
+    for(int i = 0; i < len; ++i) {
+        ASSERT_EQ(b[i].x, -safe_arr[i].x);
+        ASSERT_EQ(b[i].y, -safe_arr[i].y);
+        ASSERT_EQ(b[i].z,- safe_arr[i].z);
+    }
+    free(b);
+    //delete[] b;
+};
+
+//Param A random name, Param B test class and Param C list of inputs.
+INSTANTIATE_TEST_CASE_P(MapTests,
+        MapTests,
+        testing::ValuesIn(tvForMap)
+);
+
+/*
+ * Question 6 *************************************************
+ */
+
+class BaseRpnTests : public Question6 {
+};
+
+class RpnTests : public Question6,
+                    public testing::WithParamInterface<std::vector<double>> {
+};
+
+std::vector <std::vector<double>> tvForRpnDiv =
+    { {12, -0.5, 24, 36, 56, 9} //9 - top
+    , {0.5, 0.05} // 0.05 - top
+    , {-89, -96.025, 0, -98.23}
+    };
+
+//Param A name the test class, Param B good name for what the tests represent
+TEST_P(RpnTests, BasicDivision) {
+    std::vector<double> testVec = GetParam();
+    int len = testVec.size();
+
+    rpn_init();
+    for(int i = 0; i < len; ++i)
+        rpn_push(testVec[i]);
+
+    rpn_div();
+    EXPECT_NEAR(rpn_pop(), testVec[len-2]/testVec[len-1], DBL_PRECISION);
+    EXPECT_EQ(rpn_error(), OK);
+    rpn_free();
+};
+
+TEST_F(RpnTests, OverflowError) {
+    rpn_init();
+    rpn_push(DBL_MAX);
+    rpn_push(0.9);
+    rpn_div();
+    EXPECT_EQ(rpn_error(), OVERFLOW_ERROR);
+    rpn_free();
+};
+
+TEST_F(RpnTests, DivByZeroError) {
+    rpn_init();
+    rpn_push(0);
+    rpn_push(0);
+    rpn_div();
+    EXPECT_EQ(rpn_error(), DIVIDE_BY_ZERO_ERROR);
+    rpn_free();
+};
+
+TEST_F(RpnTests, BinaryError) {
+    rpn_init();
+    rpn_push(1);
+    rpn_div();
+    EXPECT_EQ(rpn_error(), BINARY_ERROR);  
+    rpn_free();
+};
+
+TEST_F(BaseRpnTests, Reallocation) {
+    rpn_init();
+    for (int i = 0; i < 350; i++)
+        rpn_push(i);
+    for (int i = 349; i >= 0; i--)
+        EXPECT_NEAR(rpn_pop(), i, DBL_PRECISION);
+    rpn_free();
+};
+
+//Param A random name, Param B test class and Param C list of inputs.
+INSTANTIATE_TEST_CASE_P(RpnTests,
+        RpnTests,
+        testing::ValuesIn(tvForRpnDiv)
 );

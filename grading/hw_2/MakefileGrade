@@ -21,7 +21,7 @@ INCDEP      := -I$(INCDIR)
 #Files
 DGENCONFIG  := docs.config
 HEADERS     := $(wildcard *.h)
-SOURCES     := $(wildcard *.cc) solutions.c complex.c
+SOURCES     := $(wildcard *.cc) solutions.c rpn.c
 OBJECTS     := $(patsubst %.cc, $(BUILDDIR)/%.o, $(notdir $(SOURCES)))
 
 #Defauilt Make
