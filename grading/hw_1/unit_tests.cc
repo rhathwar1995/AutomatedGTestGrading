@@ -9,7 +9,6 @@
 #include "fraction.h"
 #include "complex.h"
 #include <fstream>
-#include "gtestnodeath.h"
 #include <vector>
 
 
